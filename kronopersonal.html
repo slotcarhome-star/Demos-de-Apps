@@ -333,6 +333,29 @@
     </style>
 </head>
 <body>
+    <!-- OVERLAY DE PRUEBA EXPIRADA -->
+    <div id="trial-lock-overlay" class="hidden fixed inset-0 w-full h-full bg-gray-900 text-white z-[9999] flex-col items-center justify-center text-center p-6">
+        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-6"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <h1 class="text-4xl font-black uppercase tracking-widest mb-4 text-red-500" data-i18n="trialExpiredTitle">Prueba Expirada</h1>
+        <p class="text-xl text-gray-300" data-i18n="trialExpiredMsg">Los 7 días de prueba han finalizado.</p>
+    </div>
+
+    <!-- OVERLAY DE INFORMACIÓN (BIENVENIDA) -->
+    <div id="trial-info-overlay" class="hidden fixed inset-0 w-full h-full bg-gray-900/80 backdrop-blur-sm z-[9000] flex-col items-center justify-center p-6 transition-opacity duration-300">
+        <div class="bg-white text-gray-800 rounded-2xl p-6 max-w-sm shadow-2xl text-center">
+            <div class="mb-4 text-blue-600 flex justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </div>
+            <h2 class="text-2xl font-black uppercase tracking-widest mb-2" data-i18n="trialWelcomeTitle">Versión de Prueba</h2>
+            <p class="text-sm font-bold text-blue-700 mb-4" id="trial-days-message"></p>
+            <ul class="text-sm text-gray-700 text-left mb-6 space-y-2 bg-gray-100 p-4 rounded-lg border border-gray-200">
+                <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span data-i18n="trialLimitLaps" class="font-bold">Límite: 5 Vueltas</span></li>
+                <li class="flex items-center"><svg class="w-5 h-5 mr-2 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span data-i18n="trialLimitTime" class="font-bold">Límite: 1 Minuto</span></li>
+            </ul>
+            <button id="close-trial-info-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition-colors uppercase tracking-wide" data-i18n="understood">Entendido</button>
+        </div>
+    </div>
+
     <div class="container w-full max-w-3xl mx-auto p-4">
 
         <!-- HEADER SILVER -->
@@ -410,29 +433,18 @@
                         <input type="number" id="track-length-input" value="15" min="1" step="0.5" class="silver-input w-full p-2 rounded-md" />
                     </div>
                     <div>
-                        <!-- MODO VUELTAS (DEFAULT) -->
+                        <!-- MODO VUELTAS (TRIAL LIMIT) -->
                         <div id="laps-config-container">
                             <label for="lap-limit-select" class="block text-xs font-bold text-gray-500 mb-1 flex items-center uppercase" data-i18n="lapLimit">Límite Vueltas</label>
-                            <select id="lap-limit-select" class="silver-input w-full p-2 rounded-md">
-                                <option value="5" data-i18n="5laps">5 Vueltas</option>
-                                <option value="10" selected data-i18n="10laps">10 Vueltas</option>
-                                <option value="25" data-i18n="25laps">25 Vueltas</option>
-                                <option value="50" data-i18n="50laps">50 Vueltas</option>
-                                <option value="Infinity" data-i18n="infinite">Infinito</option>
+                            <select id="lap-limit-select" class="silver-input w-full p-2 rounded-md bg-gray-200 cursor-not-allowed" disabled>
+                                <option value="5" selected data-i18n="5laps">5 Vueltas (Prueba)</option>
                             </select>
                         </div>
-                        <!-- MODO TIEMPO (HIDDEN) -->
+                        <!-- MODO TIEMPO (TRIAL LIMIT) -->
                         <div id="time-config-container" class="hidden">
                             <label for="time-limit-select" class="block text-xs font-bold text-gray-500 mb-1 flex items-center uppercase" data-i18n="timeLimit">Tiempo Límite</label>
-                            <select id="time-limit-select" class="silver-input w-full p-2 rounded-md">
-                                <option value="5">5 Min</option>
-                                <option value="10" selected>10 Min</option>
-                                <option value="15">15 Min</option>
-                                <option value="20">20 Min</option>
-                                <option value="25">25 Min</option>
-                                <option value="30">30 Min</option>
-                                <option value="45">45 Min</option>
-                                <option value="60">60 Min</option>
+                            <select id="time-limit-select" class="silver-input w-full p-2 rounded-md bg-gray-200 cursor-not-allowed" disabled>
+                                <option value="1" selected data-i18n="1min">1 Minuto (Prueba)</option>
                             </select>
                         </div>
                     </div>
@@ -508,7 +520,7 @@
                 </div>
                 <div class="flex-1 border-l border-gray-400 pl-4 flex flex-col justify-end">
                     <p class="text-xs text-gray-500 font-bold tracking-widest" data-i18n="laps">VUELTAS</p>
-                    <p id="lap-count" class="timer-value font-arial text-gray-800">0 / 10</p> 
+                    <p id="lap-count" class="timer-value font-arial text-gray-800">0 / 5</p> 
                     <!-- NUEVO: TARGET DISPLAY FOR TIME MODE -->
                     <p id="mode-target-display" class="text-xs text-blue-700 font-bold mt-0 font-arial hidden">--</p>
                 </div>
@@ -792,8 +804,17 @@
                 yellowFlag: "BANDERA AMARILLA",
                 racePaused: "CARRERA PAUSADA",
                 
+                // Mensajes de Prueba
+                trialExpiredTitle: "Prueba Expirada",
+                trialExpiredMsg: "Los 7 días de prueba han finalizado.",
+                trialWelcomeTitle: "Versión de Prueba",
+                trialLimitLaps: "Límite: 5 Vueltas",
+                trialLimitTime: "Límite: 1 Minuto",
+                understood: "Entendido",
+                daysLeft: "Te quedan {days} días de prueba gratuita.",
+                
                 // Dropdowns
-                "5laps": "5 Vueltas", "10laps": "10 Vueltas", "25laps": "25 Vueltas", "50laps": "50 Vueltas", "infinite": "Infinito",
+                "5laps": "5 Vueltas (Prueba)", "1min": "1 Minuto (Prueba)", "10laps": "10 Vueltas", "25laps": "25 Vueltas", "50laps": "50 Vueltas", "infinite": "Infinito",
                 "1sec": "1 Segundo (Pistas muy cortas)", "3sec": "3 Segundos (Estándar)", "5sec": "5 Segundos (Pistas largas)", "10sec": "10 Segundos (Circuitos enormes)",
                 "beepClassic": "Beep Clásico (600 Hz)", "toneLow": "Tono Grave (400 Hz)", "beepHigh": "Beep Agudo (900 Hz)", "toneShort": "Pito Corto (1200 Hz)",
                 
@@ -877,8 +898,17 @@
                 yellowFlag: "YELLOW FLAG",
                 racePaused: "RACE PAUSED",
                 
+                // Mensajes de Prueba
+                trialExpiredTitle: "Trial Expired",
+                trialExpiredMsg: "The 7-day trial has ended.",
+                trialWelcomeTitle: "Trial Version",
+                trialLimitLaps: "Limit: 5 Laps",
+                trialLimitTime: "Limit: 1 Minute",
+                understood: "Understood",
+                daysLeft: "You have {days} days of free trial left.",
+                
                  // Dropdowns
-                "5laps": "5 Laps", "10laps": "10 Laps", "25laps": "25 Laps", "50laps": "50 Laps", "infinite": "Infinite",
+                "5laps": "5 Laps (Trial)", "1min": "1 Minute (Trial)", "10laps": "10 Laps", "25laps": "25 Laps", "50laps": "50 Laps", "infinite": "Infinite",
                 "1sec": "1 Second (Short tracks)", "3sec": "3 Seconds (Standard)", "5sec": "5 Seconds (Long tracks)", "10sec": "10 Seconds (Huge tracks)",
                 "beepClassic": "Classic Beep (600 Hz)", "toneLow": "Low Tone (400 Hz)", "beepHigh": "High Beep (900 Hz)", "toneShort": "Short Whistle (1200 Hz)",
                 
@@ -962,8 +992,17 @@
                 yellowFlag: "DRAPEAU JAUNE",
                 racePaused: "COURSE PAUSÉE",
                 
+                // Mensajes de Prueba
+                trialExpiredTitle: "Essai Expiré",
+                trialExpiredMsg: "L'essai de 7 jours est terminé.",
+                trialWelcomeTitle: "Version d'Essai",
+                trialLimitLaps: "Limite : 5 Tours",
+                trialLimitTime: "Limite : 1 Minute",
+                understood: "Compris",
+                daysLeft: "Il vous reste {days} jours d'essai gratuit.",
+                
                  // Dropdowns
-                "5laps": "5 Tours", "10laps": "10 Tours", "25laps": "25 Tours", "50laps": "50 Tours", "infinite": "Infini",
+                "5laps": "5 Tours (Essai)", "1min": "1 Minute (Essai)", "10laps": "10 Tours", "25laps": "25 Tours", "50laps": "50 Tours", "infinite": "Infini",
                 "1sec": "1 Seconde (Pistes courtes)", "3sec": "3 Secondes (Standard)", "5sec": "5 Secondes (Pistes longues)", "10sec": "10 Secondes (Pistes énormes)",
                 "beepClassic": "Bip Classique (600 Hz)", "toneLow": "Ton Grave (400 Hz)", "beepHigh": "Bip Aigu (900 Hz)", "toneShort": "Sifflet Court (1200 Hz)",
                 
@@ -986,6 +1025,7 @@
         };
 
         let currentLang = 'es';
+        let globalDaysLeft = 7;
 
         // --- ELEMENTOS UI ---
         const videoElement = document.getElementById('webcam-feed');
@@ -1088,9 +1128,9 @@
         // Carrera
         let raceStartTime = 0;
         let currentLap = 0;
-        let totalLaps = 10; 
+        let totalLaps = 5; // Fijado a 5 por defecto en Trial
         let raceMode = 'laps'; // 'laps' or 'time'
-        let raceTimeLimit = 0; // In ms
+        let raceTimeLimit = 60000; // Fijado a 1 min por defecto en Trial
         let finalRaceTimeMs = 0; 
         let lapHistory = [];
         let bestLapTime = Infinity;
@@ -1460,18 +1500,15 @@
             
             configPanel.classList.remove('open');
             
-            // LECTURA DE CONFIGURACION
+            // LECTURA DE CONFIGURACION FIJADA PARA PRUEBA
             raceMode = raceModeSelect.value;
             
             if (raceMode === 'laps') {
-                const val = lapLimitSelect.value;
-                totalLaps = val === 'Infinity' ? Infinity : parseInt(val);
+                totalLaps = 5; // Siempre 5 vueltas en versión de prueba
                 raceTimeLimit = 0;
             } else {
-                // TIME MODE
-                totalLaps = Infinity; // Infinite laps until time stops
-                const mins = parseInt(timeLimitSelect.value);
-                raceTimeLimit = mins * 60 * 1000;
+                totalLaps = Infinity; 
+                raceTimeLimit = 60 * 1000; // Siempre 1 minuto (60000 ms) en versión de prueba
             }
             
             updateLapDisplay(); 
@@ -1597,11 +1634,10 @@
                 document.getElementById('race-time').textContent = "00:00.000";
                 document.getElementById('lap-time').textContent = "00.000";
                 
-                // Re-read settings just in case
+                // Re-read settings just in case (Fixed for trial)
                 raceMode = raceModeSelect.value;
                 if (raceMode === 'laps') {
-                    const val = lapLimitSelect.value;
-                    totalLaps = val === 'Infinity' ? Infinity : parseInt(val);
+                    totalLaps = 5;
                 } else {
                     totalLaps = Infinity;
                 }
@@ -1621,8 +1657,7 @@
             
             if (raceMode === 'time') {
                 document.getElementById('lap-count').textContent = currentLap;
-                const mins = timeLimitSelect.value;
-                modeTargetDisplay.textContent = `${t.limitLabel}: ${mins} min`;
+                modeTargetDisplay.textContent = `${t.limitLabel}: 1 min`;
                 modeTargetDisplay.classList.remove('hidden');
             } else {
                 document.getElementById('lap-count').textContent = `${currentLap} / ${maxLapsText}`; 
@@ -1762,6 +1797,12 @@
             // Actualizar status manuales
             videoStatus.textContent = t.camLoading;
             graphStatus.textContent = lapHistory.length ? "" : t.noData;
+            
+            // Actualizar modal de prueba dinámico
+            if (t.daysLeft) {
+                document.getElementById('trial-days-message').textContent = t.daysLeft.replace('{days}', globalDaysLeft);
+            }
+            
             // Update Pause Button Text if needed (not captured by data-i18n during dynamic switch)
             if (isPaused) {
                 pauseText.textContent = t.resume;
@@ -1826,7 +1867,7 @@
         
         lapLimitSelect.addEventListener('change', () => {
             if (raceModeSelect.value === 'laps') {
-                totalLaps = lapLimitSelect.value === 'Infinity' ? Infinity : parseInt(lapLimitSelect.value);
+                totalLaps = 5; // Fijado siempre a 5
                 updateLapDisplay();
             }
         });
@@ -1837,6 +1878,11 @@
         cancelClearBtn.addEventListener('click', () => { confirmModal.classList.remove('open'); setTimeout(()=>confirmModal.classList.add('hidden'),300); });
         confirmClearBtn.addEventListener('click', () => { localStorage.removeItem('scx_history'); loadHistory(); confirmModal.classList.remove('open'); setTimeout(()=>confirmModal.classList.add('hidden'),300); });
         exportExcelBtn.addEventListener('click', exportToExcel);
+        
+        document.getElementById('close-trial-info-btn').addEventListener('click', () => {
+            document.getElementById('trial-info-overlay').classList.add('hidden');
+            document.getElementById('trial-info-overlay').classList.remove('flex');
+        });
         
         // --- LOGICA PANTALLA COMPLETA ---
         function toggleFullScreen() {
@@ -1884,6 +1930,27 @@
 
         // Init
         window.onload = () => {
+            // --- LOGICA DE PERIODO DE PRUEBA (7 DIAS SIN REGISTRO) ---
+            let trialStart = localStorage.getItem('krono_trial_start');
+            if (!trialStart) {
+                trialStart = Date.now();
+                localStorage.setItem('krono_trial_start', trialStart);
+            }
+            const daysElapsed = (Date.now() - parseInt(trialStart)) / (1000 * 60 * 60 * 24);
+            globalDaysLeft = Math.max(0, 7 - Math.floor(daysElapsed));
+            
+            if (daysElapsed > 7) {
+                const lockOverlay = document.getElementById('trial-lock-overlay');
+                lockOverlay.classList.remove('hidden');
+                lockOverlay.classList.add('flex');
+                return; // Bloquea la inicialización de la app
+            } else {
+                const infoOverlay = document.getElementById('trial-info-overlay');
+                infoOverlay.classList.remove('hidden');
+                infoOverlay.classList.add('flex');
+            }
+            // --------------------------------------------
+
             // Forzar carga de voces al inicio
             window.speechSynthesis.getVoices();
 
@@ -1897,11 +1964,11 @@
             if (savedLang) {
                 currentLang = savedLang;
                 langSelect.value = savedLang;
-                updateTexts();
             }
+            updateTexts(); // Esto actualizará los textos incluyendo los días de prueba restantes
 
             // FIX: ASEGURAR SINCRONIZACION AL CARGAR LA PAGINA
-            totalLaps = lapLimitSelect.value === 'Infinity' ? Infinity : parseInt(lapLimitSelect.value);
+            totalLaps = 5; // Fijado siempre a 5 en la versión de prueba
 
             sensitivity = 20; thresholdSlider.value=20; currentThresholdDisplay.textContent=20;
             updateLapDisplay(); stopRace(false);
