@@ -405,7 +405,7 @@
                 qualityTooltip: "CALIDAD GRÁFICA (PULSA PARA CAMBIAR)",
                 results: "RESULTADOS DE CARRERA", exportCsv: "EXPORTAR EXCEL", close: "CERRAR", lapNum: "VTA", total: "TOTAL",
                 demo1: "DEMO 1: OVAL", demo2: "DEMO 2: NINCO DIGITAL",
-                trialExpiredTitle: "Prueba Expirada", trialExpiredMsg: "Los 7 días de prueba han finalizado.", trialWelcomeTitle: "Versión de Prueba", trialLimitLaps: "Límite: 10 Vueltas", understood: "Entendido", daysLeft: "Te quedan {days} días de prueba gratuita."
+                trialExpiredTitle: "Prueba Expirada", trialExpiredMsg: "Los 7 días de prueba han finalizado.", trialWelcomeTitle: "Versión de Prueba", trialLimitLaps: "Límite: 10 Vueltas", understood: "Entendido", daysLeft: "Te quedan {days} día(s) de prueba gratuita."
             },
             en: {
                 title: "3D SLOT GAME",
@@ -523,7 +523,7 @@
                 qualityTooltip: "GRAPHICS QUALITY (CLICK TO CHANGE)",
                 results: "RACE RESULTS", exportCsv: "EXPORT EXCEL", close: "CLOSE", lapNum: "LAP", total: "TOTAL",
                 demo1: "DEMO 1: OVAL", demo2: "DEMO 2: NINCO DIGITAL",
-                trialExpiredTitle: "Trial Expired", trialExpiredMsg: "The 7-day trial has ended.", trialWelcomeTitle: "Trial Version", trialLimitLaps: "Limit: 10 Laps", understood: "Understood", daysLeft: "You have {days} days of free trial left."
+                trialExpiredTitle: "Trial Expired", trialExpiredMsg: "The 7-day trial has ended.", trialWelcomeTitle: "Trial Version", trialLimitLaps: "Limit: 10 Laps", understood: "Understood", daysLeft: "You have {days} day(s) of free trial left."
             },
             pt: {
                 title: "JOGO DE SLOT 3D",
@@ -641,7 +641,7 @@
                 qualityTooltip: "QUALIDADE GRÁFICA (CLIQUE PARA ALTERAR)",
                 results: "RESULTADOS DA CORRIDA", exportCsv: "EXPORTAR EXCEL", close: "FECHAR", lapNum: "VOLTA", total: "TOTAL",
                 demo1: "DEMO 1: OVAL", demo2: "DEMO 2: NINCO DIGITAL",
-                trialExpiredTitle: "Teste Expirado", trialExpiredMsg: "Os 7 dias de teste terminaram.", trialWelcomeTitle: "Versão de Teste", trialLimitLaps: "Limite: 10 Voltas", understood: "Entendido", daysLeft: "Restam {days} dias de teste gratuito."
+                trialExpiredTitle: "Teste Expirado", trialExpiredMsg: "Os 7 dias de teste terminaram.", trialWelcomeTitle: "Versão de Teste", trialLimitLaps: "Limite: 10 Voltas", understood: "Entendido", daysLeft: "Restam {days} dia(s) de teste gratuito."
             }
         };
 
@@ -4348,14 +4348,23 @@
                   trialStart = Date.now().toString();
                   localStorage.setItem('slot_3d_trial_start', trialStart);
               }
-              const daysElapsed = (Date.now() - parseInt(trialStart)) / (1000 * 60 * 60 * 24);
-              const daysLeft = Math.max(0, TRIAL_DAYS_LIMIT - Math.floor(daysElapsed));
+              
+              const updateTrial = () => {
+                  const daysElapsed = (Date.now() - parseInt(trialStart)) / (1000 * 60 * 60 * 24);
+                  // Math.ceil asegura que el día 1 muestre 7, el día 2 muestre 6, etc. Exacto y amigable.
+                  const daysLeft = Math.ceil(TRIAL_DAYS_LIMIT - daysElapsed);
 
-              if (daysElapsed >= TRIAL_DAYS_LIMIT) {
-                  setTrialState({ checked: true, status: 'expired', daysLeft: 0, showInfo: false });
-              } else {
-                  setTrialState({ checked: true, status: 'active', daysLeft, showInfo: true });
-              }
+                  if (daysElapsed >= TRIAL_DAYS_LIMIT) {
+                      setTrialState({ checked: true, status: 'expired', daysLeft: 0, showInfo: false });
+                  } else {
+                      setTrialState(prev => ({ ...prev, checked: true, status: 'active', daysLeft, showInfo: prev.checked ? prev.showInfo : true }));
+                  }
+              };
+
+              updateTrial();
+              // Se re-evalúa cada minuto por si el usuario deja la pestaña abierta varios días
+              const interval = setInterval(updateTrial, 60000);
+              return () => clearInterval(interval);
           }, []);
 
           // DEFAULT QUALITY a MED en lugar de HIGH para mejorar el rendimiento inicial en portátiles
@@ -5061,6 +5070,14 @@
                         </div>
                     </div>
                 )}
+
+                {/* INDICADOR PERMANENTE DE PRUEBA */}
+                {trialState.status === 'active' && trialState.checked && (
+                    <div className="fixed top-0 left-1/2 -translate-x-1/2 z-[8000] bg-blue-600 text-white text-[10px] md:text-xs font-black uppercase tracking-widest px-6 py-1.5 rounded-b-xl shadow-[0_5px_15px_rgba(37,99,235,0.5)] border-x-2 border-b-2 border-blue-400 flex items-center gap-2 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        {lang === 'es' ? `PRUEBA: ${trialState.daysLeft} DÍA(S) RESTANTE(S)` : lang === 'pt' ? `TESTE: ${trialState.daysLeft} DIA(S) RESTANTE(S)` : `TRIAL: ${trialState.daysLeft} DAY(S) LEFT`}
+                    </div>
+                )}
                 
                 <audio ref={menuMusicRef} loop preload="auto" src="https://slotcarhome-star.github.io/Probes/1.mp3" />
                 <audio ref={raceMusicRef} loop preload="auto" src="https://slotcarhome-star.github.io/Probes/2.mp3" />
@@ -5073,7 +5090,7 @@
                 )}
 
                 {circuitData ? (
-                    <Telemetry3DViewer circuitData={circuitData} carSettings={carSettings} customCarAssets={customCarAssets} onCarAssetUpdate={handleCarAssetUpdate} onClose={() => { setCircuitData(null); setSession(null); if(peerConn) peerConn.close(); try { setHasSavedCircuit(!!localStorage.getItem('slot_last_circuit')); } catch(e){} }} lang={lang} setLang={setLang} t={t} multiplayerSession={session} peerConn={peerConn} networkData={networkData} startHost={startHost} startJoin={startJoin} myPeerID={myPeerID} joinID={joinID} setJoinID={setJoinID} audioEnabled={audioEnabled} toggleAudio={toggleAudio} musicEnabled={musicEnabled} toggleMusic={toggleMusic} qualityMode={qualityMode} toggleQuality={toggleQuality} />
+                    <Telemetry3DViewer circuitData={circuitData} carSettings={carSettings} customCarAssets={customCarAssets} onCarAssetUpdate={handleCarAssetUpdate} onClose={() => { setCircuitData(null); setSession(null); if(peerConn) peerConn.close(); try { setHasSavedCircuit(!!localStorage.getItem('slot_last_circuit')); } catch(e){} }} lang={lang} setLang={setLang} t={t} multiplayerSession={session} peerConn={peerConn} networkData={networkData} startHost={startHost} startJoin={startJoin} myPeerID={myPeerID} joinID={joinID} setJoinID={setJoinID} audioEnabled={audioEnabled} toggleAudio={toggleAudio} musicEnabled={musicEnabled} toggleMusic={toggleMusic} qualityMode={qualityMode} toggleQuality={toggleQuality} isTrial={trialState.status === 'active'} />
                 ) : (
                     <div className="flex h-[100dvh] w-full bg-gradient-to-br from-blue-950 via-blue-900 to-cyan-900 overflow-hidden font-sans select-none text-gray-200 relative">
                         <Garage3DBackground carUrl={customCarAssets[editingCarId]?.glb} carRotation={customCarAssets[editingCarId]?.rotation} carOffset={customCarAssets[editingCarId]?.offset} qualityMode={qualityMode} />
