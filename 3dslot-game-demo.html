@@ -972,7 +972,13 @@
                 
                 // Alpha: true permite que el degradado del contenedor HTML brille a través del canvas
                 const qSettings = getQualitySettings(qualityMode);
-                const renderer = new THREE.WebGLRenderer({ antialias: qSettings.aa, powerPreference: "high-performance", alpha: true });
+                let renderer;
+                try {
+                    renderer = new THREE.WebGLRenderer({ antialias: qSettings.aa, alpha: true });
+                } catch(e) {
+                    // Fallback para móviles estrictos (Samsung Internet, webviews, etc)
+                    renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
+                }
                 renderer.setSize(width, height);
                 renderer.setClearColor(0x000000, 0); // Canvas transparente
                 
@@ -1028,7 +1034,7 @@
                 };
                 animate();
 
-                return () => { cancelAnimationFrame(frameId); window.removeEventListener('resize', onResize); if(controls) controls.dispose(); renderer.dispose(); if (mountRef.current) mountRef.current.innerHTML = ''; };
+                return () => { cancelAnimationFrame(frameId); window.removeEventListener('resize', onResize); if(controls) controls.dispose(); renderer.dispose(); if(renderer.forceContextLoss) renderer.forceContextLoss(); if (mountRef.current) mountRef.current.innerHTML = ''; };
             }, []);
 
             // ACTUALIZACIÓN DINÁMICA DE CALIDAD
@@ -1642,7 +1648,11 @@
                     
                     const qSettings = getQualitySettings(qualityMode);
                     camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 20000); 
-                    renderer = new THREE.WebGLRenderer({ antialias: qSettings.aa, powerPreference: "high-performance" }); 
+                    try {
+                        renderer = new THREE.WebGLRenderer({ antialias: qSettings.aa }); 
+                    } catch(e) {
+                        renderer = new THREE.WebGLRenderer({ antialias: false }); 
+                    }
                     renderer.setPixelRatio(qSettings.pr); renderer.setSize(window.innerWidth, window.innerHeight); 
                     renderer.shadowMap.enabled = qSettings.shadow; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                     renderer.outputEncoding = THREE.sRGBEncoding;
